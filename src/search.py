@@ -1,4 +1,5 @@
 from collections.abc import Callable
+import heapq
 
 from .models import SearchResult
 from .problem import WeightedGrid
@@ -214,7 +215,117 @@ def dfs(problem: WeightedGrid) -> SearchResult:
 
 def uniform_cost(problem: WeightedGrid) -> SearchResult:
     """Busca de Custo Uniforme. Implemente conforme a especificação do trabalho."""
-    raise NotImplementedError("Implemente UCS.")
+    goal = problem.goal
+    heap = []
+    insertion_counter = 0
+    # guardar o melhor custo g(n) para cada estado {(0, 0): 0, (0, 1): 1, (1, 2): 4}
+    best_g = {}
+    # guardar os estados que já foram explorados, usamos um set para facilitar a verificação
+    explored = set([])
+    father = [[None for _ in range(problem.width)] for _ in range(problem.height)]
+
+    # Caso especial: se o estado inicial já for o objetivo
+    if problem.start == goal:
+        return SearchResult(
+            found=True,
+            algorithm="UCS",
+            path=[problem.start],
+            actions=[],
+            cost=0,
+            generated=1,
+            expanded=0,
+            peak_frontier=1,
+            peak_stored_states=1,
+        )
+
+    # 1. Inicialização da fila de prioridade: (g(n), ordem_de_inserção, estado)
+    best_g[problem.start] = 0
+    heapq.heappush(heap, (0, insertion_counter, problem.start))
+    insertion_counter += 1
+
+    # 1. Inicialização das métricas obrigatórias
+    generated = 1
+    expanded = 0
+    peak_frontier = 1
+    peak_stored_states = 1
+
+    while heap:
+        cost, _, atual = heapq.heappop(heap)
+
+        # 2. Entradas obsoletas da fila de prioridade devem ser ignoradas e não contam como expansão
+        if atual in explored or cost > best_g[atual]:
+            continue
+
+        # 3. Verificação de objetivo e reconstrução do caminho ao retirar da fronteira
+        if atual == goal:
+            path = []
+            actions = []
+            total_cost = 0
+            curr = goal
+
+            # Percorre os ponteiros de pai de trás para frente até o início
+            while curr != problem.start:
+                path.append(curr)
+                parent_pos, action, step_cost = father[curr[0]][curr[1]]
+                actions.append(action)
+                total_cost += step_cost
+                curr = parent_pos
+
+            path.append(problem.start)
+
+            # Inverte para obter o caminho ordenado do início ao fim
+            path.reverse()
+            actions.reverse()
+
+            return SearchResult(
+                found=True,
+                algorithm="UCS",
+                path=path,
+                actions=actions,
+                cost=total_cost,
+                generated=generated,
+                expanded=expanded,
+                peak_frontier=peak_frontier,
+                peak_stored_states=peak_stored_states,
+            )
+
+        # 4. Contabilização da expansão
+        # O nó foi retirado da fronteira e terá seus sucessores gerados
+        explored.add(atual)
+        expanded += 1
+
+        #Retorna os sucessores do nó atual (ação, próxima posição, custo)
+        sucessors_temp = problem.successors(atual)
+        for acao, proxima_pos, step_cost in sucessors_temp:
+            novo_custo = cost + step_cost
+
+            # Atualiza o custo e predecessor se encontrar um caminho de menor custo
+            if proxima_pos not in explored:
+                # Se for o primeiro caminho para o estado OU um caminho de menor custo
+                if proxima_pos not in best_g or novo_custo < best_g[proxima_pos]:
+                    best_g[proxima_pos] = novo_custo
+                    father[proxima_pos[0]][proxima_pos[1]] = (atual, acao, step_cost)
+                    heapq.heappush(heap, (novo_custo, insertion_counter, proxima_pos))
+                    insertion_counter += 1
+
+                    # 5. Atualização das métricas na geração / melhora de caminho
+                    generated += 1
+                    distinct_frontier = len(best_g) - len(explored)
+                    peak_frontier = max(peak_frontier, distinct_frontier)
+                    peak_stored_states = max(peak_stored_states, len(best_g))
+
+    # 6. Caso a fila esvazie sem encontrar o objetivo (mapa sem solução)
+    return SearchResult(
+        found=False,
+        algorithm="UCS",
+        path=[],
+        actions=[],
+        cost=float("inf"),
+        generated=generated,
+        expanded=expanded,
+        peak_frontier=peak_frontier,
+        peak_stored_states=peak_stored_states,
+    )
 
 
 def greedy(problem: WeightedGrid, heuristic: Heuristic) -> SearchResult:
