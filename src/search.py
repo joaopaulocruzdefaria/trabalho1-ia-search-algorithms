@@ -1,5 +1,5 @@
-from collections.abc import Callable
 import heapq
+from collections.abc import Callable
 
 from .models import SearchResult
 from .problem import WeightedGrid
@@ -48,9 +48,13 @@ def bfs(problem: WeightedGrid) -> SearchResult:
         # O nó foi retirado da fronteira e terá seus sucessores gerados
         expanded += 1
 
+        # Agrupo os sucessores do atual em uma lista temporária
         sucessors_temp = problem.successors(atual)
+        # Percorro a lista temporária
         for acao, proxima_pos, custo in sucessors_temp:
+            # Se o sucessor não foi visitado, jogo ele na fila e o adiciono ao conjunto de visitados
             if proxima_pos not in visited:
+                # Salvo numa matriz na posição do sucessor os dados do pai (AJUDA NO BACKTRACKING)
                 father[proxima_pos[0]][proxima_pos[1]] = (atual, acao, custo)
                 queue.append(proxima_pos)
                 visited.add(proxima_pos)
@@ -68,7 +72,7 @@ def bfs(problem: WeightedGrid) -> SearchResult:
                     total_cost = 0
                     curr = goal
 
-                    # Percorre os ponteiros de pai de trás para frente até o início
+                    # Faz o backtracking apartir da matriz de pais
                     while curr != problem.start:
                         path.append(curr)
                         parent_pos, action, step_cost = father[curr[0]][curr[1]]
@@ -330,9 +334,204 @@ def uniform_cost(problem: WeightedGrid) -> SearchResult:
 
 def greedy(problem: WeightedGrid, heuristic: Heuristic) -> SearchResult:
     """Busca Gulosa pelo melhor primeiro."""
-    raise NotImplementedError("Implemente Busca Gulosa.")
+    goal = problem.goal
+    heap = []
+    visited = set([])
+    father = [[None for _ in range(problem.width)] for _ in range(problem.height)]
+
+    if problem.start == goal:
+         return SearchResult(
+             found=True,
+             algorithm="Greedy",
+             path=[problem.start],
+             actions=[],
+             cost=0,
+             generated=1,
+             expanded=0,
+             peak_frontier=1,
+             peak_stored_states=1,
+         )
+    insertion_counter = 0
+    heapq.heappush(heap, (heuristic(problem.start, problem.goal), insertion_counter, problem.start))
+    insertion_counter += 1
+    visited.add(problem.start)
+
+    generated = 1
+    expanded = 0
+    peak_frontier = 1
+    peak_stored_states = 1
+
+    while heap:
+        heuristica_atual, _, atual = heapq.heappop(heap)
+
+        if atual == goal:
+            path = []
+            actions = []
+            total_cost = 0
+            curr = goal
+
+            while curr != problem.start:
+                path.append(curr)
+                parent_pos, action, step_cost = father[curr[0]][curr[1]]
+                actions.append(action)
+                total_cost += step_cost
+                curr = parent_pos
+
+            path.append(problem.start)
+
+            # Inverte para ficar ordenado do início ao fim
+            path.reverse()
+            actions.reverse()
+
+            return SearchResult(
+                found=True,
+                algorithm="Greedy",
+                path=path,
+                actions=actions,
+                cost=total_cost,
+                generated=generated,
+                expanded=expanded,
+                peak_frontier=peak_frontier,
+                peak_stored_states=peak_stored_states,
+            )
+        expanded += 1
+        sucessors_temp = problem.successors(atual)
+
+        for acao, proxima_pos, custo in sucessors_temp:
+              if proxima_pos not in visited:
+                  father[proxima_pos[0]][proxima_pos[1]] = (atual, acao, custo)
+                  
+                  visited.add(proxima_pos)
+                  
+                  heapq.heappush(heap, (heuristic(proxima_pos, problem.goal), insertion_counter, proxima_pos))
+                  insertion_counter += 1
+                  generated += 1 
+                  peak_frontier = max(peak_frontier, len(heap))
+                  peak_stored_states = len(visited)
+
+    return SearchResult(
+        found=False,
+        algorithm="Greedy",
+        path=[],
+        actions=[],
+        cost=float("inf"),
+        generated=generated,
+        expanded=expanded,
+        peak_frontier=peak_frontier,
+        peak_stored_states=peak_stored_states,
+    )
+
 
 
 def astar(problem: WeightedGrid, heuristic: Heuristic) -> SearchResult:
     """Busca A*."""
-    raise NotImplementedError("Implemente A*.")
+    goal = problem.goal
+    heap = []
+    insertion_counter = 0
+    best_g = {}
+    explored = set([])
+    father = [[None for _ in range(problem.width)] for _ in range(problem.height)]
+
+    # Caso especial: se o estado inicial já for o objetivo
+    if problem.start == goal:
+        return SearchResult(
+            found=True,
+            algorithm="A*",
+            path=[problem.start],
+            actions=[],
+            cost=0,
+            generated=1,
+            expanded=0,
+            peak_frontier=1,
+            peak_stored_states=1,
+        )
+
+    # 1. Inicialização da fila de prioridade: (f(n), h(n), ordem_de_inserção, estado)
+    best_g[problem.start] = 0
+    h_start = heuristic(problem.start, goal)
+    heapq.heappush(heap, (h_start, h_start, insertion_counter, problem.start))
+    insertion_counter += 1
+
+    # Inicialização das métricas obrigatórias
+    generated = 1
+    expanded = 0
+    peak_frontier = 1
+    peak_stored_states = 1
+
+    while heap:
+        f_atual, h_atual, _, atual = heapq.heappop(heap)
+
+        # 2. Entradas obsoletas da fila de prioridade são ignoradas e não contam como expansão
+        if atual in explored:
+            continue
+
+        # 3. Verificação de objetivo e reconstrução do caminho ao retirar da fronteira
+        if atual == goal:
+            path = []
+            actions = []
+            total_cost = 0
+            curr = goal
+
+            while curr != problem.start:
+                path.append(curr)
+                parent_pos, action, step_cost = father[curr[0]][curr[1]]
+                actions.append(action)
+                total_cost += step_cost
+                curr = parent_pos
+
+            path.append(problem.start)
+            path.reverse()
+            actions.reverse()
+
+            return SearchResult(
+                found=True,
+                algorithm="A*",
+                path=path,
+                actions=actions,
+                cost=total_cost,
+                generated=generated,
+                expanded=expanded,
+                peak_frontier=peak_frontier,
+                peak_stored_states=peak_stored_states,
+            )
+
+        # 4. Contabilização da expansão
+        explored.add(atual)
+        expanded += 1
+
+        g_atual = best_g[atual]
+
+        # Gera os sucessores do nó atual
+        for acao, proxima_pos, step_cost in problem.successors(atual):
+            novo_g = g_atual + step_cost
+
+            if proxima_pos not in explored:
+                # Se for o primeiro caminho ou um caminho de menor custo
+                if proxima_pos not in best_g or novo_g < best_g[proxima_pos]:
+                    best_g[proxima_pos] = novo_g
+                    father[proxima_pos[0]][proxima_pos[1]] = (atual, acao, step_cost)
+
+                    h_prox = heuristic(proxima_pos, goal)
+                    f_prox = novo_g + h_prox
+
+                    heapq.heappush(heap, (f_prox, h_prox, insertion_counter, proxima_pos))
+                    insertion_counter += 1
+
+                    # 5. Atualização das métricas
+                    generated += 1
+                    distinct_frontier = len(best_g) - len(explored)
+                    peak_frontier = max(peak_frontier, distinct_frontier)
+                    peak_stored_states = max(peak_stored_states, len(best_g))
+
+    # 6. Caso a fila esvazie sem encontrar o objetivo
+    return SearchResult(
+        found=False,
+        algorithm="A*",
+        path=[],
+        actions=[],
+        cost=float("inf"),
+        generated=generated,
+        expanded=expanded,
+        peak_frontier=peak_frontier,
+        peak_stored_states=peak_stored_states,
+    )
