@@ -16,10 +16,10 @@ Leia primeiro o arquivo **`EC_IA_Trabalho_01_2026.pdf`**. O enunciado prevalece 
 
 Preencha estes dados antes de cada submissão:
 
-- **Aluno(a) 1:** `<nome>`
-- **Aluno(a) 2:** `<nome ou não se aplica>`
-- **Repositório Git:** `<link do repositório>`
-- **Tag:** `entrega-parte1` ou `entrega-final`
+- **Aluno(a) 1:** Pedro Henrique Galvão
+- **Aluno(a) 2:** João Paulo Cruz de Faria
+- **Repositório Git:** https://github.com/joaopaulocruzdefaria/trabalho1-ia-search-algorithms
+- **Tag:** `entrega-parte1`
 
 
 
@@ -106,6 +106,21 @@ Exemplo de execução após a implementação:
 ```bash
 python -m src.main busca --map data/mapa_teste.txt --algorithm astar --heuristic manhattan
 ```
+
+### Tabela Preliminar de Resultados da Parte 1 (`data/mapa_teste.txt`)
+
+Execução obtida através de `python scripts/run_experiments.py` (tempo mediano em milissegundos para 30 execuções):
+
+| Algoritmo | Heurística | Passos | Custo | Gerados | Expandidos | Pico Fronteira | Pico Memória | Tempo Mediano (ms) |
+|---|---|---|---|---|---|---|---|---|
+| BFS | - | 15 | 40 | 60 | 52 | 9 | 60 | 0.2100 |
+| DFS | - | 15 | 40 | 21 | 15 | 6 | 21 | 0.0756 |
+| UCS | - | 29 | 29 | 77 | 74 | 6 | 77 | 0.3803 |
+| Gulosa | Manhattan | 15 | 40 | 21 | 15 | 6 | 21 | 0.0847 |
+| A* | Manhattan | 29 | 29 | 60 | 43 | 15 | 58 | 0.2750 |
+| Gulosa | Euclidiana | 15 | 40 | 21 | 15 | 6 | 21 | 0.0869 |
+| A* | Euclidiana | 29 | 29 | 72 | 60 | 12 | 72 | 0.3730 |
+
 
 ## Parte 2 - Busca local
 
