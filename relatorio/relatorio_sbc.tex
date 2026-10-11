@@ -1,0 +1,158 @@
+\documentclass[12pt]{article}
+
+% Modelo de relatório do Trabalho 01, baseado no template de conferências da
+% Sociedade Brasileira de Computação (SBC), versão atualizada em 2017.
+\usepackage{sbc-template}
+\usepackage{graphicx,url}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{float}
+\usepackage[hidelinks]{hyperref}
+
+\sloppy
+\renewcommand{\tablename}{Tabela}
+\renewcommand{\figurename}{Figura}
+\renewcommand{\refname}{Referências}
+
+\title{Trabalho 01 - Busca Não Informada, Busca Informada e Busca Local}
+
+% Substitua pelos nomes da dupla. Se o trabalho for individual, remova o segundo nome.
+\author{Pedro Henrique Galvão\inst{1}, João Paulo Cruz de Faria\inst{1}}
+
+\address{Curso de Engenharia de Computação - CEFET-MG, campus Divinópolis\\
+Disciplina de Inteligência Artificial - 2026/2}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This report presents the implementation and experimental analysis of uninformed, informed, and local search algorithms developed for Assignment 01. The experiments compare BFS, DFS, Uniform-Cost Search, Greedy Best-First Search, and A* in a weighted grid, and Hill Climbing and Random-Restart Hill Climbing in the 8-Queens problem. Replace this paragraph with a concise summary of the problem, methodology, main quantitative results, and conclusions. The abstract should not exceed approximately 10 lines.
+\end{abstract}
+
+\begin{resumo}
+Este relatório apresenta a implementação e a análise experimental dos algoritmos de busca desenvolvidos no Trabalho 01. Os experimentos comparam BFS, DFS, Busca de Custo Uniforme, Busca Gulosa e A* em um ambiente ponderado, além de Hill Climbing e Random-Restart Hill Climbing no problema das 8 rainhas. Substitua este texto por um resumo objetivo contendo problema, metodologia, principais resultados quantitativos e conclusão. O resumo deve ter aproximadamente 10 linhas ou menos.
+\end{resumo}
+
+\section{Introdução}
+Apresente brevemente os dois problemas tratados no trabalho e o objetivo da comparação experimental. Não transforme esta seção em uma revisão extensa dos algoritmos. O foco do relatório é a implementação realizada pelos autores e a interpretação dos resultados obtidos.
+
+Ao final desta seção, indique de forma objetiva as perguntas que a análise pretende responder, como a relação entre número de passos e custo, o efeito das heurísticas e as limitações do Hill Climbing.
+
+\section{Representação e implementação}
+\subsection{Parte 1 - Busca não informada e informada}
+Descreva a representação do estado, as estruturas utilizadas para fronteira e estados visitados, o tratamento de custos e a reconstrução do caminho. Explique também como foram implementados os critérios de desempate exigidos no enunciado.
+
+Evite inserir grandes trechos de código. Quando necessário, use apenas pequenos fragmentos para explicar uma decisão de implementação relevante.
+
+\subsection{Heurísticas}
+Informe como foram calculadas as distâncias Manhattan e Euclidiana e explique por que elas são adequadas ao modelo de movimento adotado. A discussão sobre admissibilidade deve aparecer posteriormente, com base nos resultados e nas propriedades do problema.
+
+\subsection{Problema das 8 rainhas}
+Descreva a representação de uma configuração, a função de avaliação $h(s)$, a definição da vizinhança e os critérios de parada do Hill Climbing. Explique também como os reinícios aleatórios foram realizados e como as sementes foram controladas.
+
+\section{Metodologia experimental}
+Descreva o ambiente utilizado para os experimentos, a versão do Python e qualquer dependência relevante. Informe os mapas utilizados, as heurísticas avaliadas e a forma de obtenção das métricas.
+
+Para as 8 rainhas, indique explicitamente que foram executadas as sementes de 0 a 99 e que o Random-Restart Hill Climbing utilizou o limite estabelecido no enunciado.
+
+O relatório deve permitir que outra pessoa reproduza os resultados utilizando o repositório entregue. Informe neste parágrafo o endereço do repositório Git e a tag utilizada na entrega final.
+
+\noindent\textbf{Repositório:} \url{https://github.com/joaopaulocruzdefaria/trabalho1-ia-search-algorithms} \\
+\textbf{Tag da entrega final:} \texttt{entrega-final}.
+
+\section{Resultados}
+\subsection{Parte 1 - Busca não informada e informada}
+A Tabela~\ref{tab:grid} apresenta os resultados obtidos no mapa de teste (\texttt{data/mapa\_teste.txt}) para as buscas não informadas e informadas.
+
+\begin{table}[H]
+\centering
+\caption{Resultados dos algoritmos de busca no mapa de teste.}
+\label{tab:grid}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llrrrrrrr}
+\toprule
+Algoritmo & Heurística & Passos & Custo & Gerados & Expandidos & Pico fronteira & Memória & Tempo (ms) \\
+\midrule
+BFS     & -          & 15 & 40 & 60 & 52 & 9 & 60 & 0.2100 \\
+DFS     & -          & 15 & 40 & 21 & 15 & 6 & 21 & 0.0756 \\
+UCS     & -          & 29 & 29 & 77 & 74 & 6 & 77 & 0.3803 \\
+Gulosa  & Manhattan  & 15 & 40 & 21 & 15 & 6 & 21 & 0.0847 \\
+Gulosa  & Euclidiana & 15 & 40 & 21 & 15 & 6 & 21 & 0.0869 \\
+A*      & Manhattan  & 29 & 29 & 60 & 43 & 15 & 58 & 0.2750 \\
+A*      & Euclidiana & 29 & 29 & 72 & 60 & 12 & 72 & 0.3730 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+Inclua pelo menos uma representação visual dos caminhos encontrada pelos algoritmos quando ela contribuir para a discussão. Não é necessário inserir uma figura para cada execução se isso apenas repetir informação.
+
+\subsection{Parte 2 - Busca local e 8 rainhas}
+A Tabela~\ref{tab:queens} resume os experimentos obrigatórios com as sementes de 0 a 99.
+
+\begin{table}[H]
+\centering
+\caption{Resultados dos métodos de busca local no problema das 8 rainhas.}
+\label{tab:queens}
+\begin{tabularx}{\textwidth}{Xrr}
+\toprule
+Métrica & Hill Climbing & Random Restart \\
+\midrule
+Execuções & 100 & 100 \\
+Soluções encontradas & - & - \\
+Taxa de sucesso (\%) & - & - \\
+Média de iterações & - & - \\
+Mediana de iterações & - & - \\
+Média de estados avaliados & - & - \\
+Média de reinícios & N/A & - \\
+Máximo de reinícios & N/A & - \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Apresente ainda pelo menos um caso de falha do Hill Climbing. Informe a semente, o estado inicial, o estado final, os valores inicial e final de $h(s)$ e explique por que nenhum movimento permitido produziu melhora.
+
+\section{Discussão}
+Esta seção analisa os resultados experimentais obtidos à luz dos fundamentos teóricos dos algoritmos de busca, respondendo diretamente às questões norteadoras do trabalho.
+
+\subsection{Busca Não Informada e Informada (Questões 1 a 5)}
+
+\paragraph{Questão 1: Número de ações vs. custo da solução.}
+Sim, o BFS encontrou o menor número de ações, totalizando 15 passos, empatado com DFS e Busca Gulosa. No entanto, este caminho não foi o de menor custo, resultando em um custo final de 40. Isso ocorre porque o BFS prioriza a menor profundidade na árvore de busca, considerando apenas o número de transições e ignorando os pesos do mapa. Em um ambiente com terrenos heterogêneos, a rota com menos passos acabou atravessando células de custo elevado, enquanto algoritmos que consideram custo, como UCS e A*, encontraram uma rota alternativa de 29 passos com custo ótimo de 29.
+
+\paragraph{Questão 2: Divergência entre BFS e UCS em ambientes ponderados.}
+A divergência decorre do critério de ordenação da fronteira. O BFS utiliza uma fila FIFO e expande os nós por nível de profundidade, garantindo o caminho com menos arestas independentemente do custo individual de cada passo. Em contrapartida, o UCS utiliza uma fila de prioridade ordenada pelo custo acumulado $g(n)$, expandindo sempre o nó de menor custo de caminho. Assim, quando o trajeto mais direto passa por terrenos caros, o BFS opta por essa rota curta e cara, enquanto o UCS contorna os obstáculos por caminhos que exigem mais passos, mas somam menor custo total.
+
+\paragraph{Questão 3: Influência da ordem de sucessores na DFS.}
+O DFS opera com pilha e explora exaustivamente o primeiro ramo descendente até o fim antes de realizar backtracking. Como não possui informação de custo nem orientação heurística, a ordem de geração dos sucessores determina diretamente qual região do espaço de busca será explorada primeiro. No mapa de teste, a ordem dos sucessores coincidiu com a direção do objetivo, permitindo ao DFS encontrar a solução com apenas 15 expansões por puro fator de sorte. Caso a ordem fosse desfavorável, o DFS teria se aprofundado em ramos infrutíferos, expandindo muitos nós desnecessários e retornando um caminho excessivamente longo.
+
+\paragraph{Questão 4: Poucas expansões e custo elevado na Busca Gulosa.}
+A Busca Gulosa avalia a fronteira exclusivamente pelo valor da heurística $h(n)$, que estima a distância restante até o objetivo, desconsiderando o custo acumulado $g(n)$ do caminho. Guiado apenas pela proximidade geográfica da meta, o algoritmo avança em linha reta e conclui a busca com apenas 15 estados expandidos. Todavia, ao ignorar o custo real das transições, o algoritmo atravessou células de terreno difícil com custo final de 40 em vez de realizar desvios por caminhos mais baratos.
+
+\paragraph{Questão 5: Comparação entre UCS e A* em custo e expansões.}
+Sim, tanto o A* quanto o UCS convergiram para a solução de custo ótimo de 29. Essa equivalência é garantida porque o UCS é ótimo para custos positivos e as heurísticas utilizadas no A* são admissíveis. A diferença central está no esforço computacional: o UCS expandiu 74 nós ao se propagar de maneira uniforme em todas as direções, enquanto o A* guiado pela heurística Manhattan expandiu 43 nós. A função combinada $f(n) = g(n) + h(n)$ orientou a busca diretamente na direção da meta, podando estados irrelevantes.
+
+\section{Conclusão}
+Sintetize os principais achados do trabalho. Indique quais estratégias foram mais adequadas em cada cenário e quais limitações foram observadas. Não introduza resultados novos nesta seção.
+
+\section*{Contribuições dos autores}
+Em trabalhos em dupla, descreva objetivamente a contribuição de cada integrante na implementação, experimentos, testes, análise e redação. Em trabalho individual, informe que todas as etapas foram realizadas pelo autor.
+
+\section*{Declaração de uso de IA}
+O detalhamento do uso de ferramentas de Inteligência Artificial deve constar no arquivo \texttt{IA\_USAGE.md} entregue com o repositório. Nesta seção, escreva apenas uma síntese, por exemplo: ``Foram utilizadas ferramentas de IA para revisão textual e esclarecimento de mensagens de erro, conforme detalhado no arquivo IA\_USAGE.md''. Caso nenhuma ferramenta tenha sido utilizada, declare isso explicitamente.
+
+\begin{thebibliography}{99}
+
+\bibitem[Stuart and Norvig 2021]{russell2021}
+Russell, S. and Norvig, P. (2021). \textit{Artificial Intelligence: A Modern Approach}. Pearson, 4th edition.
+
+% Adicione aqui outras referências realmente consultadas. Todo material externo usado
+% na fundamentação, implementação ou discussão deve ser citado.
+
+\end{thebibliography}
+
+\end{document}
