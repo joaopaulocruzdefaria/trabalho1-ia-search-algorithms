@@ -124,21 +124,36 @@ Execução obtida através de `python scripts/run_experiments.py` (tempo mediano
 
 ## Parte 2 - Busca local
 
-Devem ser implementados para o problema das 8 Rainhas:
+Implementações para o problema das 8 Rainhas:
 
-- Hill Climbing;
-- Random-Restart Hill Climbing.
+- Hill Climbing (sem movimentos laterais, primeiro melhor vizinho);
+- Random-Restart Hill Climbing (com limite configurável de reinícios).
 
-Exemplos:
+Exemplos de execução:
 
 ```bash
 python -m src.main rainhas --algorithm hill --seed 42
 python -m src.main rainhas --algorithm restart --seed 42 --max-restarts 50
 ```
 
-## Teste inicial do código-base
+### Tabela de Resultados da Parte 2 (8 Rainhas - Sementes 0 a 99)
 
-Antes de implementar os algoritmos, execute:
+Execução obtida através de `python scripts/run_experiments.py`:
+
+| Métrica | Hill Climbing | Random Restart |
+|---|---:|---:|
+| Execuções | 100 | 100 |
+| Soluções encontradas | 12 | 100 |
+| Taxa de sucesso (%) | 12.0% | 100.0% |
+| Média de iterações | 3.28 | 24.72 |
+| Mediana de iterações | 3.0 | 17.5 |
+| Média de estados avaliados | 233.96 | 1770.64 |
+| Média de reinícios | N/A | 6.76 |
+| Máximo de reinícios | N/A | 42 |
+
+## Testes automatizados do projeto
+
+Para executar a suíte completa de testes:
 
 ```bash
 python -m unittest discover -s tests -v

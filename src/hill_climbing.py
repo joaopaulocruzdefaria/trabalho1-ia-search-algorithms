@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from random import Random
 from typing import List
 
-from .eight_queens import Board, apply_move, conflicts, moves
+from .eight_queens import Board, apply_move, conflicts, initial_board, moves
 
 
 @dataclass
@@ -80,4 +80,48 @@ def random_restart(rng: Random, max_restarts: int = 50) -> HillResult:
     Execute Hill Climbing com reinícios aleatórios até encontrar solução
     ou atingir max_restarts.
     """
-    raise NotImplementedError("Implemente Random-Restart Hill Climbing.")
+    first_initial: Board = []
+    first_initial_conflicts = 0
+    total_iterations = 0
+    total_evaluated_states = 0
+    all_history: List[int] = []
+    last_result: HillResult | None = None
+
+    for restart_count in range(max_restarts + 1):
+        board = initial_board(rng)
+        if restart_count == 0:
+            first_initial = board
+            first_initial_conflicts = conflicts(board)
+
+        result = hill_climbing(board)
+        total_iterations += result.iterations
+        total_evaluated_states += result.evaluated_states
+        all_history.extend(result.history)
+        last_result = result
+
+        if result.success:
+            return HillResult(
+                success=True,
+                initial=first_initial,
+                final=result.final,
+                initial_conflicts=first_initial_conflicts,
+                final_conflicts=result.final_conflicts,
+                iterations=total_iterations,
+                evaluated_states=total_evaluated_states,
+                restarts=restart_count,
+                history=all_history,
+            )
+
+    # Caso atinja o limite máximo de reinícios sem sucesso
+    assert last_result is not None
+    return HillResult(
+        success=False,
+        initial=first_initial,
+        final=last_result.final,
+        initial_conflicts=first_initial_conflicts,
+        final_conflicts=last_result.final_conflicts,
+        iterations=total_iterations,
+        evaluated_states=total_evaluated_states,
+        restarts=max_restarts,
+        history=all_history,
+    )

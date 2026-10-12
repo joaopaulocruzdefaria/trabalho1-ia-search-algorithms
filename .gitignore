@@ -24,3 +24,7 @@ Thumbs.db
 *.out
 *.toc
 *.synctex.gz
+
+# Arquivos pessoais de controle
+CHECKLIST_PARTE2.md
+
