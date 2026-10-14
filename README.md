@@ -19,7 +19,7 @@ Preencha estes dados antes de cada submissão:
 - **Aluno(a) 1:** Pedro Henrique Galvão
 - **Aluno(a) 2:** João Paulo Cruz de Faria
 - **Repositório Git:** https://github.com/joaopaulocruzdefaria/trabalho1-ia-search-algorithms
-- **Tag:** `entrega-parte1`
+- **Tag:** `entrega-final`
 
 
 
